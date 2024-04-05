@@ -92,7 +92,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
             # Check for sudden movements and show on camera feed   
             # Show at Camera Feed
-            sudden_movement_message = ""
+            sudden_movement_elbow = ""
+            sudden_movement_shoulder = ""
             if check_for_sudden_movement(elbow_angle):
                 sm_elb = True
                 count_elb = 0
@@ -102,7 +103,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             
             if sm_elb:
                 if count_elb < 20:
-                    sudden_movement_message += "Elbow: Sudden movement detected! "
+                    sudden_movement_elbow = "Elbow: Sudden movement detected!"
                     count_elb += 1
                 else:
                     count_elb = 0
@@ -110,17 +111,19 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             
             if sm_shou:
                 if count_shou < 20:
-                    sudden_movement_message += "Shoulder: Sudden movement detected! "
+                    sudden_movement_shoulder = "Shoulder: Sudden movement detected!"
                     count_shou += 1
                 else:
                     count_shou = 0
                     sm_shou = False
 
-            if sudden_movement_message:
+            if sudden_movement_elbow or sudden_movement_shoulder:
                 # Display message on both terminal and the camera feed
-                print(sudden_movement_message)
-                cv2.putText(image, sudden_movement_message, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
-
+                print(sudden_movement_elbow)
+                print(sudden_movement_shoulder)
+                cv2.putText(image, sudden_movement_elbow, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+                cv2.putText(image, sudden_movement_shoulder, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+                
             # Visualize angles
             # Elbow
             elbow_position = tuple(np.multiply(elbow, [640, 480]).astype(int))
