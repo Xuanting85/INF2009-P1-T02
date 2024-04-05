@@ -5,8 +5,8 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 cap = cv2.VideoCapture(0)
-## Setup mediapipe instance
 
+#define angle calculation
 def calculate_angle(a,b,c):
     a = np.array(a) # First point
     b = np.array(b) # Mid point
@@ -41,15 +41,14 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             landmarks = results.pose_landmarks.landmark
             
             # Get coordinates to calculate angle at desired joint
-            #For ELbow
+            
+            #For ELbow use shoulder, elbow, wrist
             shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
             elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
             wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-            
-            #For Shoulder
+            #Include Hip for Shoulder so it will be hip, shoulder, elbow
             hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
-            shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-            elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+            
             
             # Calculate angle at the elbow
             elbow_angle = calculate_angle(shoulder, elbow, wrist)
