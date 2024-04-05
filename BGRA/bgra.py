@@ -1,9 +1,11 @@
+#existing imports 
 import cv2
 import mediapipe as mp
 import numpy as np
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
+# video feed
 cap = cv2.VideoCapture(0)
 
 #define angle calculation
@@ -25,6 +27,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
     while cap.isOpened():
         ret, frame = cap.read()
         
+        # Mirror image
+        frame = cv2.flip(frame, 1)
+        
         # Recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
@@ -41,30 +46,31 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             landmarks = results.pose_landmarks.landmark
             
             # Get coordinates to calculate angle at desired joint
-            
             #For ELbow use shoulder, elbow, wrist
-            shoulder = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
-            elbow = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
-            wrist = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+            shoulder = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
+            elbow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+            wrist = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
             #Include Hip for Shoulder so it will be hip, shoulder, elbow
-            hip = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
+            hip = [landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y]
             
-            
-            # Calculate angle at the elbow
+            # Calculate angles
+            # Elbow
             elbow_angle = calculate_angle(shoulder, elbow, wrist)
+            # Shoulder 
+            shoulder_angle = calculate_angle(hip, shoulder, elbow)
+            
+            # Visualise Angles
+            # Elbow
             elbow_position = tuple(np.multiply(elbow, [640, 480]).astype(int))
-            cv2.putText(image, str(elbow_angle), 
+            cv2.putText(image, f"{elbow_angle:.3f}", 
                         elbow_position, 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-            # Calculate angle at the shoulder
-            shoulder_angle = calculate_angle(hip, shoulder, elbow)
+            # Shoulder
             shoulder_position = tuple(np.multiply(shoulder, [640, 480]).astype(int))
-            cv2.putText(image, str(shoulder_angle), 
+            cv2.putText(image, f"{shoulder_angle:.3f}", 
                         shoulder_position, 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-
-                       
+                                  
             print(landmarks)
         except:
             pass
@@ -76,7 +82,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                                 mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
                                  )               
         
-        cv2.imshow('Mediapipe Feed', image)
+        cv2.imshow('Biomechanical Gesture Recognition and Analysis', image)
 
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
