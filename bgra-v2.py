@@ -1,5 +1,6 @@
 # Existing imports 
 import cv2
+from datetime import datetime
 import mediapipe as mp
 import numpy as np
 from scipy.stats import zscore
@@ -55,7 +56,7 @@ def check_for_sudden_movement(new_angle, window_size=10, threshold=2):
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
         ret, frame = cap.read()
-
+       
         # Mirror image
         frame = cv2.flip(frame, 1)
 
@@ -131,6 +132,15 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.putText(image, f"{shoulder_angle:.3f}",
                         shoulder_position,
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+            
+            # Get current time
+            current_time = datetime.now().strftime("%H:%M:%S")
+
+            # Get fram dimensions
+            height, width, channels = image.shape
+            # Display current time on the video feed at the bottom-left corner
+            cv2.putText(image, current_time, (10, height - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+
 
             print(landmarks)
         except:
